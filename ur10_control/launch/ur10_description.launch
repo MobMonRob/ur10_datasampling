@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- send urdf to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur10_control)/urdf/ur10.xacro'" />
+
+  <!--GUI used to send fake joint values-->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="false"/>
+  </node>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find ur10_control)/config/ur10_control.yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+	output="screen" ns="/ur10" args="joint_state_controller
+					  joint1_position_controller
+            joint2_position_controller
+            joint3_position_controller
+					  joint4_position_controller"/> -->
+
+  <node name="move_robot" pkg="ur10_control" type="move_robot" respawn="false"
+	output="screen" ns="/ur10" args="joint_state_controller
+					  joint1_position_controller
+            joint2_position_controller
+            joint3_position_controller
+					  joint4_position_controller"/>
+
+  <!--Publish robot state to TF-->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <node type="rviz" name="rviz" pkg="rviz"/>
+
+  <!-- The arm mover node -->
+  <node name="arm_mover" type="arm_mover" pkg="ur10_control" output="screen">
+    <rosparam>
+      min_joint_1_angle: 0
+      max_joint_1_angle: 1.57
+      min_joint_2_angle: 0
+      max_joint_2_angle: 1.0
+      min_joint_3_angle: 0
+      max_joint_3_angle: 1.57
+      min_joint_4_angle: 0
+      max_joint_4_angle: 1.0
+    </rosparam>
+  </node> 
+
+</launch>
